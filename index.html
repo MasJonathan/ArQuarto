@@ -1,897 +1,845 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quarto corrigé</title>
+<!-- saved from url=(0090)file:///D:/Media/Downloads/Jeu%20de%20Morpion%20Variant%20%E2%80%93%20Mode%20Complexe.html -->
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <!-- Pour une bonne adaptation aux écrans mobiles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeu de Morpion Variant – Mode Complexe</title>
   <style>
-    /* ===================== RESET & GLOBAL ===================== */
-    * {
-      box-sizing: border-box;
-      margin: 0; 
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+    /* Style général */
     body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #FCEBDC 0%, #F8E3CF 100%);
-      color: #333;
-    }
-    h1, h2, h3 {
-      margin: 0.5rem 0;
-      text-align: center;
-      color: #5C3D2E;
+      background: #f0f0f0;
     }
     .container {
-      width: 95%;
-      max-width: 900px;
-      margin: 1rem auto;
-      background: #FFFDF8;
-      border: 2px solid rgba(200, 180, 150, 0.2);
+      width: 90%;
+      max-width: 500px;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       border-radius: 8px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.15);
-      padding: 1rem;
     }
-    button {
-      cursor: pointer;
-    }
-
-    /* ===================== PAGE DE CONFIG ===================== */
-    #settings-page {
-      display: block; /* visible au départ */
-    }
-    .settings-section {
-      margin-bottom: 1rem;
-    }
-    .settings-section label {
-      margin-right: 1rem;
-    }
-    .subsection {
-      margin-left: 2rem;
-      margin-top: 0.5rem;
-    }
-    #playBtn {
-      padding: 0.6rem 1.2rem;
-      background: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    #playBtn:hover {
-      background: #218838;
-    }
-
-    /* ===================== PAGE DU JEU ===================== */
-    #game-page {
-      display: none; /* masqué au départ */
-    }
-    .game-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .btn-small {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-      background: #ccc;
-      border: none;
-      border-radius: 4px;
-    }
-
-    .status-info {
-      font-weight: bold;
-      color: #5C3D2E;
-      margin-bottom: 1rem;
+    h1 {
       text-align: center;
     }
-
-    /* ---------- Plateau ---------- */
+    /* Options de démarrage */
+    #game-options {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #game-options select,
+    #game-options button {
+      margin: 5px;
+      padding: 5px 10px;
+      font-size: 16px;
+    }
+    /* Plateau en grille */
     #board {
       display: grid;
-      gap: 6px;
-      margin: 0 auto 1rem;
-      background: #F5EFEA;
-      border: 2px solid #D2C3B8;
-      border-radius: 8px;
-      padding: 6px;
-      max-width: 400px;
+      gap: 5px;
+      margin: 20px 0;
     }
     .cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #FFFDF8;
-      border: 2px solid #D8CCC2;
-      border-radius: 6px;
-      width: 70px;
-      height: 70px;
+      background: #e0e0e0;
+      width: 100%;
+      padding-top: 100%; /* Pour obtenir des cellules carrées */
       position: relative;
-      transition: transform 0.2s;
       cursor: pointer;
+      transition: box-shadow 0.3s, border 0.3s;
     }
-    .cell:hover {
-      transform: scale(1.04);
-      background: #FDF7ED;
+    .cell.filled {
+      cursor: default;
     }
-    .cell.highlight {
-      border-color: #FF7F2A;
-      background: #FFEFE4;
+    /* Mise en évidence des cellules gagnantes */
+    .cell.win {
+      border: 2px solid gold;
+      box-shadow: 0 0 10px 5px gold;
     }
-
-    /* ---------- Stock des pièces ---------- */
-    #stock {
+    .cell-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
       justify-content: center;
-      margin-bottom: 1rem;
-    }
-    .piece-container {
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      background: #FFFDF8;
-      border: 2px solid #D8CCC2;
-      border-radius: 6px;
-      padding: 4px;
-      width: 60px;
-      cursor: pointer;
-      transition: all 0.2s;
     }
-    .piece-container:hover {
-      background: #FDF7ED;
-      transform: scale(1.03);
+    /* Styles des pièces de base */
+    .piece {
+      width: 80%;
+      height: 80%;
+      display: block;
     }
-    .piece-container.selected {
-      border-color: #5C92CA;
-      background: #E6F0FF;
+    .piece.circle {
+      border-radius: 50%;
     }
-    .piece-visual {
-      margin-bottom: 4px;
+    .piece.square {
+      border-radius: 0;
     }
-
-    /* Forme visuelle d'une pièce */
-    .shape {
-      margin: 0 auto;
-      transition: all 0.2s;
+    .piece.white {
+      background-color: white;
+      border: 2px solid #000;
     }
-
-    /* ---------- Pièce reçue ---------- */
-    #pieceGiven {
+    .piece.black {
+      background-color: black;
+    }
+    /* Styles pour le mode complexe : taille et remplissage */
+    .petite {
+      transform: scale(0.6);
+    }
+    .grande {
+      transform: scale(1.2);
+    }
+    .creuse {
+      background-color: transparent !important;
+      border: 2px solid currentColor;
+    }
+    .pleine {
+      /* Style par défaut pour une pièce pleine */
+    }
+    /* Sélection de pièce */
+    #piece-selection {
       text-align: center;
-      margin-bottom: 1rem;
-    }
-    #pieceGivenTitle {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-
-    /* ===================== MESSAGES ===================== */
-    #messageBox {
-      display: none;
-      text-align: center;
-      margin-top: 1rem;
-      padding: 0.8rem;
-      background: #e3f7d3;
-      border: 1px solid #c9e7b7;
-      border-radius: 4px;
-      color: #2d5f2f;
-    }
-    #winningCombo {
+      margin: 10px 0;
+      /* Disposition en grille flexible pour aérer les options */
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
       justify-content: center;
-      margin-top: 0.5rem;
+      gap: 10px;
+    }
+    .piece-option {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      margin: 10px;
+      border: 2px solid #333;
+      cursor: pointer;
+    }
+    .piece-option.circle {
+      border-radius: 50%;
+    }
+    .piece-option.square {
+      border-radius: 0;
+    }
+    .piece-option.white {
+      background-color: white;
+      border: 2px solid #000;
+    }
+    .piece-option.black {
+      background-color: black;
+    }
+    /* Pour le mode complexe, on ajoute aussi les classes de taille et remplissage */
+    .piece-option.petite { transform: scale(0.6); }
+    .piece-option.grande { transform: scale(1.2); }
+    .piece-option.creuse {
+      background-color: transparent !important;
+      border: 2px solid currentColor;
+    }
+    .piece-option.pleine { /* style par défaut */ }
+    /* Statut, affichage de la pièce donnée et bouton de redémarrage */
+    #status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    /* Nouvelle zone pour afficher visuellement la pièce donnée par l'adversaire */
+    #given-piece {
+      text-align: center;
+      margin-top: 10px;
+    }
+    #restart {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-
-<div class="container">
-
-  <!-- =====================
-       PAGE DE CONFIG
-  ====================== -->
-  <div id="settings-page">
-    <h1>Configuration de la partie de Quarto</h1>
-
-    <!-- Taille du plateau -->
-    <div class="settings-section">
-      <h3>Taille du plateau</h3>
-      <label><input type="radio" name="boardSize" value="2x2" checked />2x2</label>
-      <label><input type="radio" name="boardSize" value="3x3" />3x3</label>
-      <label><input type="radio" name="boardSize" value="4x3" />4x3</label>
-      <label><input type="radio" name="boardSize" value="4x4" />4x4</label>
+  <div class="container">
+    <h1>Morpion Variant</h1>
+    <!-- Options de démarrage -->
+    <div id="game-options" style="display: none;">
+      <label for="grid-size">Taille de la grille :</label>
+      <select id="grid-size">
+         <option value="2">2 x 2</option>
+         <option value="3" selected="">3 x 3</option>
+         <option value="4">4 x 4</option>
+      </select>
+      <label for="mode">Mode de jeu :</label>
+      <select id="mode">
+         <option value="ai" selected="">Jouer contre l'IA</option>
+         <option value="human">Deux joueurs</option>
+      </select>
+      <label for="difficulty">Difficulté :</label>
+      <select id="difficulty">
+         <option value="random" selected="">Random</option>
+         <option value="smart">Smart</option>
+      </select>
+      <label for="piece-type">Type de pièces :</label>
+      <select id="piece-type">
+         <option value="simple" selected="">Simple</option>
+         <option value="complexe">Complexe</option>
+      </select>
+      <button id="start-game">Démarrer le jeu</button>
+    </div>
+    <!-- Zone de jeu -->
+    <div id="game" style="display: block;">
+      <!-- Le plateau sera généré dynamiquement -->
+      <div id="board" style="grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); pointer-events: none;"><div class="cell" data-row="0" data-col="0"><div class="cell-content"></div></div><div class="cell" data-row="0" data-col="1"><div class="cell-content"></div></div><div class="cell" data-row="0" data-col="2"><div class="cell-content"></div></div><div class="cell" data-row="1" data-col="0"><div class="cell-content"></div></div><div class="cell" data-row="1" data-col="1"><div class="cell-content"></div></div><div class="cell" data-row="1" data-col="2"><div class="cell-content"></div></div><div class="cell" data-row="2" data-col="0"><div class="cell-content"></div></div><div class="cell" data-row="2" data-col="1"><div class="cell-content"></div></div><div class="cell" data-row="2" data-col="2"><div class="cell-content"></div></div></div>
+      <!-- Zone de sélection de pièce (générée dynamiquement selon le mode choisi) -->
+      <div id="piece-selection" style="display: block;"><p style="width: 100%; text-align: center;">Choisissez la pièce à donner à votre adversaire :</p><div class="piece-option circle black" data-color="black" data-shape="circle"></div><div class="piece-option square black" data-color="black" data-shape="square"></div><div class="piece-option circle white" data-color="white" data-shape="circle"></div><div class="piece-option square white" data-color="white" data-shape="square"></div></div>
+      <!-- Zone de statut -->
+      <div id="status">Début du jeu. Choisissez la pièce que devra jouer votre adversaire.</div>
+      <!-- Zone pour afficher la pièce donnée par l'adversaire -->
+      <div id="given-piece"></div>
+      <!-- Bouton de redémarrage -->
+      <button id="restart" style="display: none;">Recommencer</button>
     </div>
 
-    <!-- Adversaire -->
-    <div class="settings-section">
-      <h3>Adversaire</h3>
-      <label><input type="radio" name="opponent" value="human" checked />Humain (même appareil)</label>
-      <label><input type="radio" name="opponent" value="ai" />IA</label>
+    <script>
+      /****************************************************
+       * Partie 1 – Logique du jeu et gestion de l’état *
+       ****************************************************/
+      let gameState = {
+        grid: [],
+        gridSize: 3,
+        phase: "",         // "selection" ou "placement"
+        currentPlayer: "", // En mode IA : "human" ou "bot" ; en mode deux joueurs : "player1" ou "player2"
+        currentPiece: null, // Exemple : { color:"black", shape:"circle", ... } (dépend du type de pièces)
+        terminal: false,
+        winner: null,
+        difficulty: "random",  // "random" ou "smart"
+        mode: "ai", // "ai" ou "human"
+        pieceType: "simple" // "simple" ou "complexe"
+      };
 
-      <!-- Options IA -->
-      <div id="ai-settings" class="subsection" style="display:none;">
-        <div>
-          <strong>Force de l’IA :</strong><br/>
-          <label><input type="radio" name="aiStrength" value="random" checked />Aléatoire</label>
-          <label><input type="radio" name="aiStrength" value="smart" />Smart (Minimax/MonteCarlo)</label>
-        </div>
-        <div style="margin-top: 0.5rem;">
-          <strong>Qui commence ?</strong><br/>
-          <label><input type="radio" name="aiStarts" value="human" checked />Moi</label>
-          <label><input type="radio" name="aiStarts" value="ai" />IA</label>
-        </div>
-      </div>
-    </div>
+      // Éléments du DOM
+      const boardElement = document.getElementById('board');
+      const pieceSelectionElement = document.getElementById('piece-selection');
+      const statusElement = document.getElementById('status');
+      const givenPieceElement = document.getElementById('given-piece');
+      const restartButton = document.getElementById('restart');
+      const startGameButton = document.getElementById('start-game');
+      const gridSizeSelect = document.getElementById('grid-size');
+      const difficultySelect = document.getElementById('difficulty');
+      const modeSelect = document.getElementById('mode');
+      const pieceTypeSelect = document.getElementById('piece-type');
 
-    <!-- Options supplémentaires -->
-    <div class="settings-section">
-      <h3>Options supplémentaires</h3>
-      <label><input type="checkbox" id="simplifiedMode" />Mode simplifié (2 attributs)</label><br/>
-      <label><input type="checkbox" id="stockLimited" />Stock limité (uniques)</label>
-    </div>
-
-    <!-- Bouton Play -->
-    <div style="text-align:center; margin-top:1rem;">
-      <button id="playBtn">Play</button>
-    </div>
-  </div>
-
-  <!-- =====================
-       PAGE DE JEU
-  ====================== -->
-  <div id="game-page">
-    <div class="game-header">
-      <h1>Quarto</h1>
-      <button id="resetBtn" class="btn-small">Recommencer</button>
-    </div>
-
-    <!-- Info "Tour du joueur X" ou "Sélectionnez une pièce pour l'adversaire" -->
-    <div class="status-info" id="statusInfo">Préparez-vous…</div>
-
-    <!-- Aperçu de la pièce reçue -->
-    <div id="pieceGiven">
-      <div id="pieceGivenTitle"></div>
-      <div id="pieceGivenContent"></div>
-    </div>
-
-    <!-- Le plateau -->
-    <div id="board"></div>
-
-    <!-- Le stock de pièces disponibles -->
-    <div id="stock"></div>
-
-    <!-- Message (victoire, Quarto, etc.) -->
-    <div id="messageBox">
-      <div id="messageText"></div>
-      <div id="winningCombo"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-/* ============================================================
-   1) CONFIGURATION (FORM)
-============================================================ */
-const radioOpponent = document.getElementsByName("opponent");
-const aiSettingsDiv = document.getElementById("ai-settings");
-radioOpponent.forEach(radio => {
-  radio.addEventListener("change", () => {
-    if (radio.value === "ai" && radio.checked) {
-      aiSettingsDiv.style.display = "block";
-    } else if (radio.value === "human" && radio.checked) {
-      aiSettingsDiv.style.display = "none";
-    }
-  });
-});
-
-document.getElementById("playBtn").addEventListener("click", () => {
-  startGame();
-});
-
-function getSettings() {
-  const boardSize = document.querySelector('input[name="boardSize"]:checked').value;
-  const opponent = document.querySelector('input[name="opponent"]:checked').value;
-
-  let aiStrength = null;
-  let aiStarts   = null;
-  if (opponent === "ai") {
-    aiStrength = document.querySelector('input[name="aiStrength"]:checked').value;
-    aiStarts   = document.querySelector('input[name="aiStarts"]:checked').value;
-  }
-
-  const simplifiedMode = document.getElementById("simplifiedMode").checked;
-  const stockLimited   = document.getElementById("stockLimited").checked;
-
-  return { boardSize, opponent, aiStrength, aiStarts, simplifiedMode, stockLimited };
-}
-
-/* ============================================================
-   2) VARIABLES & DÉMARRAGE
-============================================================ */
-let settings = null;
-let nbRows = 0, nbCols = 0;
-let boardState = [];       // tableau 2D
-let piecesStock = [];      // pièces disponibles
-let selectedPiece = null;  // pièce qu'on "donne" à l'adversaire
-let pieceToPlace = null;   // pièce qu'on doit placer sur le plateau
-let currentPlayer = 1;     // 1, 2, ou "AI"
-let gameOver = false;
-
-function startGame() {
-  settings = getSettings();
-
-  // Déterminer rows/cols
-  const parts = settings.boardSize.split("x");
-  nbRows = parseInt(parts[0]);
-  nbCols = parseInt(parts[1]);
-
-  // Générer les pièces
-  generateAllPieces();
-
-  // Stock limité -> on ne garde que nbRows * nbCols pièces
-  const totalCells = nbRows * nbCols;
-  if (settings.stockLimited) {
-    piecesStock = piecesStock.slice(0, totalCells);
-  } else {
-    // Au besoin, on duplique si le plateau est plus grand
-    if (piecesStock.length < totalCells) {
-      const needed = totalCells - piecesStock.length;
-      for (let i=0; i<needed; i++) {
-        piecesStock.push({...piecesStock[i], id: 1000 + i});
+      function initGame() {
+        gameState.gridSize = parseInt(gridSizeSelect.value);
+        gameState.difficulty = difficultySelect.value;
+        gameState.mode = modeSelect.value;
+        gameState.pieceType = pieceTypeSelect.value;
+        gameState.grid = [];
+        gameState.terminal = false;
+        gameState.winner = null;
+        // Création d'une grille vide
+        for (let i = 0; i < gameState.gridSize; i++) {
+          let row = [];
+          for (let j = 0; j < gameState.gridSize; j++) {
+            row.push(null);
+          }
+          gameState.grid.push(row);
+        }
+        // Initialisation des rôles selon le mode de jeu
+        if (gameState.mode === "ai") {
+          gameState.phase = "selection";
+          gameState.currentPlayer = "human";
+          gameState.currentPiece = null;
+          statusElement.textContent = "Début du jeu. Choisissez la pièce que devra jouer votre adversaire.";
+        } else {
+          gameState.phase = "selection";
+          gameState.currentPlayer = "player1";
+          gameState.currentPiece = null;
+          statusElement.textContent = "Début du jeu. Joueur 1, choisissez la pièce que devra jouer votre adversaire (Joueur 2).";
+        }
+        createBoard();
+        generatePieceOptions();
+        pieceSelectionElement.style.display = "block";
+        boardElement.style.pointerEvents = "none";
+        givenPieceElement.innerHTML = "";
       }
-    }
-  }
 
-  createBoard();
-
-  // Afficher la page de jeu
-  document.getElementById("settings-page").style.display = "none";
-  document.getElementById("game-page").style.display = "block";
-
-  // Init
-  boardState = Array.from({ length: nbRows }, () => Array(nbCols).fill(null));
-  gameOver = false;
-  pieceToPlace = null;
-  selectedPiece = null;
-  currentPlayer = 1; // par défaut, l'humain commence
-
-  if (settings.opponent === "ai" && settings.aiStarts === "ai") {
-    currentPlayer = "AI";
-  }
-
-  renderStock();
-  renderReceivedPiece(null);
-  updateStatus();
-
-  // Si l'IA commence => elle choisit la première pièce
-  if (currentPlayer === "AI") {
-    setTimeout(() => {
-      aiChoosePieceForOpponent();
-    }, 500);
-  }
-}
-
-/* ============================================================
-   3) GÉNÉRATION DES PIÈCES
-============================================================ */
-function generateAllPieces() {
-  piecesStock = [];
-  if (settings.simplifiedMode) {
-    // 2 attributs => forme(0,1), couleur(0,1)
-    for (let f=0; f<2; f++) {
-      for (let c=0; c<2; c++) {
-        piecesStock.push({
-          id: piecesStock.length,
-          taille: 0,
-          forme: f,
-          couleur: c,
-          remplissage: 0
-        });
-      }
-    }
-  } else {
-    // 4 attributs => 16 combos
-    for (let t=0; t<2; t++) {
-      for (let f=0; f<2; f++) {
-        for (let c=0; c<2; c++) {
-          for (let r=0; r<2; r++) {
-            piecesStock.push({
-              id: piecesStock.length,
-              taille: t,
-              forme: f,
-              couleur: c,
-              remplissage: r
-            });
+      function createBoard() {
+        boardElement.innerHTML = "";
+        boardElement.style.gridTemplateColumns = `repeat(${gameState.gridSize}, 1fr)`;
+        boardElement.style.gridTemplateRows = `repeat(${gameState.gridSize}, 1fr)`;
+        for (let i = 0; i < gameState.gridSize; i++) {
+          for (let j = 0; j < gameState.gridSize; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+            cell.addEventListener('click', onCellClick);
+            const cellContent = document.createElement('div');
+            cellContent.classList.add('cell-content');
+            cell.appendChild(cellContent);
+            boardElement.appendChild(cell);
           }
         }
       }
-    }
-  }
-}
 
-/* ============================================================
-   4) PLATEAU
-============================================================ */
-function createBoard() {
-  const boardDiv = document.getElementById("board");
-  boardDiv.innerHTML = "";
-  boardDiv.style.gridTemplateRows = `repeat(${nbRows}, 70px)`;
-  boardDiv.style.gridTemplateColumns = `repeat(${nbCols}, 70px)`;
-
-  for (let r=0; r<nbRows; r++) {
-    for (let c=0; c<nbCols; c++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.row = r;
-      cell.dataset.col = c;
-      cell.addEventListener("click", () => onCellClicked(r,c));
-      boardDiv.appendChild(cell);
-    }
-  }
-}
-
-function onCellClicked(r, c) {
-  if (gameOver) return;
-  if (!pieceToPlace) return; // on n'a pas encore reçu de pièce
-  if (boardState[r][c] !== null) return; // cellule occupée
-
-  // Placer la pièce qu'on a reçue
-  boardState[r][c] = pieceToPlace;
-  renderCell(r, c, pieceToPlace);
-
-  // Retirer du stock
-  piecesStock = piecesStock.filter(p => p.id !== pieceToPlace.id);
-  renderStock();
-
-  // Vérifier Quarto
-  if (checkQuarto(r, c)) {
-    endGame(`QUARTO ! ${displayPlayer(currentPlayer)} gagne !`);
-    return;
-  }
-
-  // Étape suivante : on doit choisir la pièce pour l'adversaire
-  pieceToPlace = null;
-  renderReceivedPiece(null);
-
-  updateStatus();
-}
-
-/* Mettre à jour l'affichage d’une cellule */
-function renderCell(r, c, piece) {
-  const boardDiv = document.getElementById("board");
-  const cell = boardDiv.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
-  cell.innerHTML = "";
-  if (!piece) return;
-
-  const shapeDiv = document.createElement("div");
-  shapeDiv.style.display = "inline-block";
-  applyPieceStyles(shapeDiv, piece, { forBoard: true });
-  cell.appendChild(shapeDiv);
-}
-
-/* ============================================================
-   5) STOCK : sélection d'une pièce pour l'adversaire
-============================================================ */
-function renderStock() {
-  const stockDiv = document.getElementById("stock");
-  stockDiv.innerHTML = "";
-
-  piecesStock.forEach(piece => {
-    const container = document.createElement("div");
-    container.classList.add("piece-container");
-    container.dataset.id = piece.id;
-
-    if (selectedPiece && selectedPiece.id === piece.id) {
-      container.classList.add("selected");
-    }
-
-    const shapeDiv = document.createElement("div");
-    shapeDiv.classList.add("shape","piece-visual");
-    applyPieceStyles(shapeDiv, piece);
-    container.appendChild(shapeDiv);
-
-    const txt = document.createElement("div");
-    txt.style.fontSize = "0.6rem";
-    txt.textContent = pieceToString(piece);
-    container.appendChild(txt);
-
-    // Clic => on "donne" cette pièce à l’adversaire
-    container.addEventListener("click", () => {
-      if (gameOver) return;
-      // Si on a encore une pièce à poser, on ne peut pas en choisir une nouvelle
-      if (pieceToPlace) return;
-
-      selectedPiece = piece;
-      renderStock();
-      givePieceToNextPlayer(piece);
-    });
-
-    stockDiv.appendChild(container);
-  });
-}
-
-/* ============================================================
-   6) FIN D'UN TOUR : ON DONNE LA PIÈCE À L'ADVERSAIRE
-============================================================ */
-function givePieceToNextPlayer(piece) {
-  selectedPiece = null;
-
-  // Fin du tour du joueur courant => on passe à l'adversaire
-  if (settings.opponent === "ai") {
-    currentPlayer = (currentPlayer === 1) ? "AI" : 1;
-  } else {
-    currentPlayer = (currentPlayer === 1) ? 2 : 1;
-  }
-
-  // L’adversaire reçoit cette pièce à poser
-  pieceToPlace = piece;
-  renderReceivedPiece(piece);
-
-  updateStatus();
-
-  // Si c'est l'IA qui doit poser, on la laisse jouer
-  if (currentPlayer === "AI") {
-    // L'IA place la pièce reçue
-    setTimeout(() => {
-      aiPlacePiece();
-    }, 500);
-  }
-}
-
-/* Indication sur l’état du jeu */
-function updateStatus() {
-  const info = document.getElementById("statusInfo");
-  if (gameOver) {
-    info.textContent = "Partie terminée.";
-    return;
-  }
-  if (pieceToPlace) {
-    info.textContent = `${displayPlayer(currentPlayer)} doit poser la pièce reçue…`;
-  } else {
-    info.textContent = `${displayPlayer(currentPlayer)} doit choisir une pièce pour l'adversaire…`;
-  }
-}
-
-/* ============================================================
-   7) PIÈCE REÇUE : affichage
-============================================================ */
-function renderReceivedPiece(piece) {
-  const titleDiv = document.getElementById("pieceGivenTitle");
-  const contentDiv = document.getElementById("pieceGivenContent");
-  contentDiv.innerHTML = "";
-
-  if (!piece) {
-    titleDiv.textContent = "Aucune pièce reçue pour l'instant.";
-    return;
-  }
-  titleDiv.textContent = "Pièce à poser :";
-
-  const container = document.createElement("div");
-  container.classList.add("piece-container");
-
-  const shapeDiv = document.createElement("div");
-  shapeDiv.classList.add("shape","piece-visual");
-  applyPieceStyles(shapeDiv, piece);
-  container.appendChild(shapeDiv);
-
-  const txt = document.createElement("div");
-  txt.style.fontSize = "0.6rem";
-  txt.textContent = pieceToString(piece);
-  container.appendChild(txt);
-
-  contentDiv.appendChild(container);
-}
-
-/* ============================================================
-   8) IA : PLACE ET CHOISIT
-============================================================ */
-function aiChoosePieceForOpponent() {
-  if (gameOver) return;
-  let piece = null;
-  if (settings.aiStrength === "random") {
-    piece = pickRandomPiece();
-  } else {
-    piece = pickSmartPiece();
-  }
-  // On "donne" la pièce au joueur humain
-  givePieceToNextPlayer(piece);
-}
-
-function aiPlacePiece() {
-  if (gameOver || !pieceToPlace) return;
-
-  let move = null;
-  if (settings.aiStrength === "random") {
-    move = pickRandomMove();
-  } else {
-    move = pickSmartMove();
-  }
-
-  // Plus de coups ?
-  if (!move) {
-    endGame("Plus de coups possibles, match nul !");
-    return;
-  }
-
-  // L'IA place la pièce
-  boardState[move.r][move.c] = pieceToPlace;
-  renderCell(move.r, move.c, pieceToPlace);
-  piecesStock = piecesStock.filter(p => p.id !== pieceToPlace.id);
-  renderStock();
-
-  // Vérifier Quarto
-  if (checkQuarto(move.r, move.c)) {
-    endGame("QUARTO ! L'IA gagne !");
-    return;
-  }
-
-  // L'IA a posé sa pièce => elle choisit maintenant la pièce pour l'autre
-  pieceToPlace = null;
-  renderReceivedPiece(null);
-
-  setTimeout(() => {
-    aiChoosePieceForOpponent();
-  }, 500);
-}
-
-/* IA aléatoire : choisir une pièce */
-function pickRandomPiece() {
-  if (piecesStock.length===0) return null;
-  const idx = Math.floor(Math.random()*piecesStock.length);
-  return piecesStock[idx];
-}
-
-/* IA "smart" (mini-exemple) */
-function pickSmartPiece() {
-  let bestPiece = null;
-  let bestScore = -Infinity;
-  for (let p of piecesStock) {
-    const sc = evaluatePieceChoice(p);
-    if (sc>bestScore) {
-      bestScore= sc;
-      bestPiece= p;
-    }
-  }
-  return bestPiece;
-}
-
-/* IA aléatoire : choisir une cellule */
-function pickRandomMove() {
-  const moves = [];
-  for (let r=0; r<nbRows; r++){
-    for (let c=0; c<nbCols; c++){
-      if (!boardState[r][c]) moves.push({r,c});
-    }
-  }
-  if (moves.length===0) return null;
-  const idx = Math.floor(Math.random()*moves.length);
-  return moves[idx];
-}
-
-/* IA "smart" : chercher coup gagnant sinon pseudo-scorer */
-function pickSmartMove() {
-  // 1) Coup gagnant immédiat ?
-  const winning = findWinningMove(pieceToPlace);
-  if (winning) return winning;
-
-  // 2) Sinon pseudo-score
-  let bestMove=null, bestScore=-Infinity;
-  const moves = [];
-  for (let r=0; r<nbRows; r++){
-    for (let c=0; c<nbCols; c++){
-      if (!boardState[r][c]) moves.push({r,c});
-    }
-  }
-  if (moves.length===0) return null;
-
-  for (let mv of moves) {
-    const sc = evaluateMoveForAI(mv, pieceToPlace);
-    if (sc>bestScore) {
-      bestScore=sc;
-      bestMove=mv;
-    }
-  }
-  return bestMove;
-}
-
-function findWinningMove(piece) {
-  for (let r=0; r<nbRows; r++){
-    for (let c=0; c<nbCols; c++){
-      if (!boardState[r][c]) {
-        boardState[r][c] = piece;
-        const w = checkQuarto(r, c);
-        boardState[r][c] = null;
-        if (w) return {r,c};
-      }
-    }
-  }
-  return null;
-}
-
-function evaluateMoveForAI(move, piece) {
-  boardState[move.r][move.c] = piece;
-  const sc = pseudoMonteCarloScore();
-  boardState[move.r][move.c] = null;
-  return sc;
-}
-
-function evaluatePieceChoice(piece) {
-  // Simplement random
-  return Math.random()*10;
-}
-
-function pseudoMonteCarloScore() {
-  return Math.floor(Math.random()*10);
-}
-
-/* ============================================================
-   9) CHECK QUARTO & FIN DE PARTIE
-============================================================ */
-function checkQuarto(r, c) {
-  const linesOf4 = getAllLinesOf4();
-  const idxToCheck = r*nbCols + c;
-
-  for (let line of linesOf4) {
-    if (line.includes(idxToCheck)) {
-      const pieces = line.map(i => {
-        const rr = Math.floor(i/nbCols);
-        const cc = i%nbCols;
-        return boardState[rr][cc];
-      });
-      if (pieces.every(x => x!==null)) {
-        // Attribut commun ?
-        const attr = isQuartoLine(pieces);
-        if (attr) {
-          highlightCells(line);
-          // Ex: endGame(...). On renvoie true pour signaler la victoire
-          return true;
+      // Génère dynamiquement les options de pièces selon le type choisi
+      function generatePieceOptions() {
+        pieceSelectionElement.innerHTML = "";
+        let title = document.createElement('p');
+        title.textContent = "Choisissez la pièce à donner à votre adversaire :";
+        title.style.width = "100%";
+        title.style.textAlign = "center";
+        pieceSelectionElement.appendChild(title);
+        if (gameState.pieceType === "simple") {
+          let pieces = [
+            { color: "black", shape: "circle" },
+            { color: "black", shape: "square" },
+            { color: "white", shape: "circle" },
+            { color: "white", shape: "square" }
+          ];
+          for (let piece of pieces) {
+            let div = document.createElement('div');
+            div.classList.add('piece-option', piece.shape, piece.color);
+            div.dataset.color = piece.color;
+            div.dataset.shape = piece.shape;
+            pieceSelectionElement.appendChild(div);
+          }
+        } else if (gameState.pieceType === "complexe") {
+          let colors = ["black", "white"];
+          let shapes = ["circle", "square"];
+          let sizes = ["grande", "petite"];
+          let fills = ["pleine", "creuse"];
+          for (let color of colors) {
+            for (let shape of shapes) {
+              for (let size of sizes) {
+                for (let fill of fills) {
+                  let div = document.createElement('div');
+                  div.classList.add('piece-option', shape, color, size, fill);
+                  div.dataset.color = color;
+                  div.dataset.shape = shape;
+                  div.dataset.size = size;
+                  div.dataset.fill = fill;
+                  pieceSelectionElement.appendChild(div);
+                }
+              }
+            }
+          }
         }
       }
-    }
-  }
-  return false;
-}
 
-/* Renvoie "taille"/"forme"/"couleur"/"remplissage" si commun, sinon null */
-function isQuartoLine(pieces) {
-  const attrs = ["taille","forme","couleur","remplissage"];
-  for (let a of attrs) {
-    let v0 = pieces[0][a];
-    if (pieces[1][a]===v0 && pieces[2][a]===v0 && pieces[3][a]===v0) {
-      return a;
-    }
-  }
-  return null;
-}
+      // Lorsqu'une cellule est cliquée (phase de placement)
+      function onCellClick(e) {
+        if (gameState.terminal) return;
+        if (gameState.phase === "placement") {
+          // En mode deux joueurs, la pièce est placée par l'adversaire du sélectionneur
+          let effectivePlayer = gameState.currentPlayer;
+          if (gameState.mode === "human") {
+            effectivePlayer = (gameState.currentPlayer === "player1") ? "player2" : "player1";
+          }
+          const cell = e.currentTarget;
+          const row = parseInt(cell.dataset.row);
+          const col = parseInt(cell.dataset.col);
+          if (gameState.grid[row][col] !== null) return;
+          gameState.grid[row][col] = gameState.currentPiece;
+          renderBoard();
+          if (checkWinForGrid(gameState.grid, gameState.gridSize)) {
+            gameState.terminal = true;
+            gameState.winner = effectivePlayer;
+            endGame(gameState.mode === "ai" 
+              ? "L'adversaire a gagné !"
+              : ("Joueur " + (effectivePlayer === "player1" ? "1" : "2") + " a gagné !"));
+            return;
+          } else if (isBoardFull(gameState.grid, gameState.gridSize)) {
+            gameState.terminal = true;
+            endGame("Match nul !");
+            return;
+          }
+          // Passage à la phase de sélection
+          if (gameState.mode === "ai") {
+            gameState.phase = "selection";
+            statusElement.textContent = "Choisissez la pièce que devra jouer votre adversaire.";
+            generatePieceOptions();
+            pieceSelectionElement.style.display = "block";
+            boardElement.style.pointerEvents = "none";
+          } else {
+            gameState.currentPlayer = effectivePlayer;
+            let nextPlacer = (gameState.currentPlayer === "player1") ? "player2" : "player1";
+            statusElement.textContent = "Joueur " + (nextPlacer === "player1" ? "1" : "2") + ", choisissez la pièce pour votre adversaire.";
+            gameState.phase = "selection";
+            generatePieceOptions();
+            pieceSelectionElement.style.display = "block";
+            boardElement.style.pointerEvents = "none";
+          }
+        }
+      }
 
-function getAllLinesOf4() {
-  const combos = [];
-  // Horizontales
-  for (let r=0; r<nbRows; r++){
-    for (let c=0; c<nbCols-3; c++){
-      combos.push([r*nbCols+c, r*nbCols+c+1, r*nbCols+c+2, r*nbCols+c+3]);
-    }
-  }
-  // Verticales
-  for (let c=0; c<nbCols; c++){
-    for (let r=0; r<nbRows-3; r++){
-      combos.push([r*nbCols+c, (r+1)*nbCols+c, (r+2)*nbCols+c, (r+3)*nbCols+c]);
-    }
-  }
-  // Diag descendantes
-  for (let r=0; r<nbRows-3; r++){
-    for (let c=0; c<nbCols-3; c++){
-      combos.push([
-        r*nbCols + c,
-        (r+1)*nbCols + (c+1),
-        (r+2)*nbCols + (c+2),
-        (r+3)*nbCols + (c+3),
-      ]);
-    }
-  }
-  // Diag ascendantes
-  for (let r=3; r<nbRows; r++){
-    for (let c=0; c<nbCols-3; c++){
-      combos.push([
-        r*nbCols + c,
-        (r-1)*nbCols + (c+1),
-        (r-2)*nbCols + (c+2),
-        (r-3)*nbCols + (c+3),
-      ]);
-    }
-  }
-  return combos;
-}
+      // Met à jour l'affichage du plateau et surligne, en fin de partie, les cellules gagnantes
+      function renderBoard() {
+        for (let i = 0; i < gameState.gridSize; i++) {
+          for (let j = 0; j < gameState.gridSize; j++) {
+            const cell = boardElement.querySelector(`.cell[data-row='${i}'][data-col='${j}']`);
+            const cellContent = cell.querySelector('.cell-content');
+            cellContent.innerHTML = "";
+            cell.classList.remove('win');
+            const piece = gameState.grid[i][j];
+            if (piece !== null) {
+              const pieceDiv = document.createElement('div');
+              pieceDiv.classList.add('piece', piece.shape, piece.color);
+              if (gameState.pieceType === "complexe") {
+                pieceDiv.classList.add(piece.size, piece.fill);
+              }
+              cellContent.appendChild(pieceDiv);
+              cell.classList.add('filled');
+            }
+          }
+        }
+        if (gameState.terminal) {
+          const winningCells = getWinningCells(gameState.grid, gameState.gridSize);
+          for (let coord of winningCells) {
+            const cell = boardElement.querySelector(`.cell[data-row='${coord.row}'][data-col='${coord.col}']`);
+            if(cell) cell.classList.add('win');
+          }
+        }
+      }
 
-function highlightCells(line) {
-  const boardDiv = document.getElementById("board");
-  line.forEach(idx => {
-    const rr = Math.floor(idx/nbCols);
-    const cc = idx%nbCols;
-    const cell = boardDiv.querySelector(`.cell[data-row='${rr}'][data-col='${cc}']`);
-    if (cell) cell.classList.add("highlight");
-  });
-}
+      function isBoardFull(grid, gridSize) {
+        for (let i = 0; i < gridSize; i++) {
+          for (let j = 0; j < gridSize; j++) {
+            if (grid[i][j] === null) return false;
+          }
+        }
+        return true;
+      }
 
-/* Fin de partie */
-function endGame(msg) {
-  gameOver = true;
-  document.getElementById("messageBox").style.display = "block";
-  document.getElementById("messageText").textContent = msg;
-  updateStatus();
-}
+      /****************************************************
+       * Partie 2 – Vérification de victoire *
+       ****************************************************/
+      // Renvoie un objet contenant les informations de la ligne gagnante
+      // { cells: [{row, col}, ...], property: "color", value: "black" }
+      function getWinningLineInfo(grid, gridSize) {
+        // Vérification des lignes
+        for (let i = 0; i < gridSize; i++) {
+          let row = grid[i];
+          if (row.every(cell => cell !== null)) {
+            let keys = Object.keys(row[0]);
+            for (let key of keys) {
+              if (row.every(cell => cell[key] === row[0][key])) {
+                let cells = [];
+                for (let j = 0; j < gridSize; j++) {
+                  cells.push({row: i, col: j});
+                }
+                return { cells: cells, property: key, value: row[0][key] };
+              }
+            }
+          }
+        }
+        // Vérification des colonnes
+        for (let j = 0; j < gridSize; j++) {
+          let col = [];
+          for (let i = 0; i < gridSize; i++) {
+            col.push(grid[i][j]);
+          }
+          if (col.every(cell => cell !== null)) {
+            let keys = Object.keys(col[0]);
+            for (let key of keys) {
+              if (col.every(cell => cell[key] === col[0][key])) {
+                let cells = [];
+                for (let i = 0; i < gridSize; i++) {
+                  cells.push({row: i, col: j});
+                }
+                return { cells: cells, property: key, value: col[0][key] };
+              }
+            }
+          }
+        }
+        // Diagonale principale
+        let diag1 = [];
+        for (let i = 0; i < gridSize; i++) {
+          diag1.push(grid[i][i]);
+        }
+        if (diag1.every(cell => cell !== null)) {
+          let keys = Object.keys(diag1[0]);
+          for (let key of keys) {
+            if (diag1.every(cell => cell[key] === diag1[0][key])) {
+              let cells = [];
+              for (let i = 0; i < gridSize; i++) {
+                cells.push({row: i, col: i});
+              }
+              return { cells: cells, property: key, value: diag1[0][key] };
+            }
+          }
+        }
+        // Diagonale secondaire
+        let diag2 = [];
+        for (let i = 0; i < gridSize; i++) {
+          diag2.push(grid[i][gridSize - 1 - i]);
+        }
+        if (diag2.every(cell => cell !== null)) {
+          let keys = Object.keys(diag2[0]);
+          for (let key of keys) {
+            if (diag2.every(cell => cell[key] === diag2[0][key])) {
+              let cells = [];
+              for (let i = 0; i < gridSize; i++) {
+                cells.push({row: i, col: gridSize - 1 - i});
+              }
+              return { cells: cells, property: key, value: diag2[0][key] };
+            }
+          }
+        }
+        return null;
+      }
 
-/* ============================================================
-   10) RECOMMENCER
-============================================================ */
-document.getElementById("resetBtn").addEventListener("click", () => {
-  document.getElementById("settings-page").style.display = "block";
-  document.getElementById("game-page").style.display = "none";
-  document.getElementById("messageBox").style.display = "none";
-});
+      // Fonction utilisée pour vérifier la victoire (retourne true si la victoire est détectée)
+      function checkWinForGrid(grid, gridSize) {
+        return getWinningLineInfo(grid, gridSize) !== null;
+      }
 
-/* =====================
-   UTILITAIRES
-===================== */
-function applyPieceStyles(el, piece, options={}) {
-  const { forBoard=false } = options;
-  const size = forBoard ? 40 : 30;
+      // Renvoie les cellules gagnantes à partir de getWinningLineInfo
+      function getWinningCells(grid, gridSize) {
+        let info = getWinningLineInfo(grid, gridSize);
+        if (info) return info.cells;
+        return [];
+      }
 
-  el.style.width = size + "px";
-  el.style.height = size + "px";
+      // Retourne une description textuelle de la pièce (affiche aussi taille et remplissage en mode complexe)
+      function describePiece(piece) {
+        let desc = piece.color + ", " + piece.shape;
+        if (gameState.pieceType === "complexe") {
+          desc += ", " + piece.size + ", " + piece.fill;
+        }
+        return desc;
+      }
 
-  // Agrandir si "grand"
-  const scale = (piece.taille===1)?1.3:1.0;
-  el.style.transform = `scale(${scale})`;
+      // Met à jour le texte de fin de jeu en indiquant la propriété commune gagnante, si disponible
+      function endGame(message) {
+        gameState.terminal = true;
+        let winInfo = getWinningLineInfo(gameState.grid, gameState.gridSize);
+        if (winInfo && gameState.winner !== null) {
+          message += " (Victoire par " + winInfo.property + " : " + winInfo.value + ")";
+        }
+        statusElement.textContent = message;
+        pieceSelectionElement.style.display = "none";
+        boardElement.style.pointerEvents = "none";
+        restartButton.style.display = "block";
+        renderBoard();
+      }
 
-  // Forme
-  el.style.borderRadius = (piece.forme===0)?"50%":"0";
+      /****************************************************
+       * Partie 3 – Actions (placement & sélection) *
+       ****************************************************/
+      pieceSelectionElement.addEventListener('click', function(e) {
+        if (gameState.terminal) return;
+        if (e.target.classList.contains('piece-option')) {
+          let piece = {};
+          piece.color = e.target.dataset.color;
+          piece.shape = e.target.dataset.shape;
+          if (gameState.pieceType === "complexe") {
+            piece.size = e.target.dataset.size;
+            piece.fill = e.target.dataset.fill;
+          }
+          gameState.currentPiece = piece;
+          pieceSelectionElement.style.display = "none";
+          if (gameState.mode === "ai") {
+            if (gameState.currentPlayer === "human") {
+              // Le joueur humain sélectionne pour que le bot joue ensuite
+              gameState.currentPlayer = "bot";
+              gameState.phase = "placement";
+              statusElement.textContent = "L'adversaire va jouer...";
+              givenPieceElement.innerHTML = "";
+              setTimeout(botPlay, 1000);
+            } else {
+              statusElement.textContent = "C'est votre tour. Vous devez placer une pièce " + describePiece(gameState.currentPiece) + ".";
+              updateGivenPieceDisplay();
+              gameState.currentPlayer = "human";
+              gameState.phase = "placement";
+              boardElement.style.pointerEvents = "auto";
+            }
+          } else {
+            // En mode deux joueurs, le sélectionneur donne la pièce à son adversaire
+            let placer = (gameState.currentPlayer === "player1") ? "player2" : "player1";
+            statusElement.textContent = "Joueur " + (placer === "player1" ? "1" : "2") + ", c'est votre tour. Vous devez placer une pièce " + describePiece(gameState.currentPiece) + ".";
+            updateGivenPieceDisplay();
+            gameState.phase = "placement";
+            boardElement.style.pointerEvents = "auto";
+          }
+        }
+      });
 
-  // Couleurs
-  const bgClair="#ECE3D5", borderClair="#CAB7A2";
-  const bgFonce="#7B5B46", borderFonce="#5C3D2E";
-  const isFonce = (piece.couleur===1);
+      /****************************************************
+       * Partie 4 – IA (Random ou Smart) *
+       ****************************************************/
+      // Retourne la liste de toutes les pièces possibles selon le mode choisi
+      function getAllPossiblePieces() {
+        if (gameState.pieceType === "complexe") {
+          let pieces = [];
+          let colors = ["black", "white"];
+          let shapes = ["circle", "square"];
+          let sizes = ["grande", "petite"];
+          let fills = ["pleine", "creuse"];
+          for (let color of colors) {
+            for (let shape of shapes) {
+              for (let size of sizes) {
+                for (let fill of fills) {
+                  pieces.push({ color: color, shape: shape, size: size, fill: fill });
+                }
+              }
+            }
+          }
+          return pieces;
+        } else {
+          return [
+            { color: "black", shape: "circle" },
+            { color: "black", shape: "square" },
+            { color: "white", shape: "circle" },
+            { color: "white", shape: "square" }
+          ];
+        }
+      }
 
-  // Remplissage
-  if (piece.remplissage===0) {
-    el.style.backgroundColor = isFonce?bgFonce:bgClair;
-    el.style.borderWidth="0px";
-    el.style.borderStyle="none";
-  } else {
-    el.style.backgroundColor="transparent";
-    el.style.borderWidth="4px";
-    el.style.borderStyle="solid";
-    el.style.borderColor=isFonce?borderFonce:borderClair;
-  }
-}
+      function botPlay() {
+        if (gameState.terminal) return;
+        if (gameState.difficulty === "smart") {
+          smartBotMove();
+        } else {
+          botRandomPlay();
+        }
+      }
 
-function pieceToString(p) {
-  if (settings && settings.simplifiedMode) {
-    const f = (p.forme===0)?"Rond":"Carré";
-    const c = (p.couleur===0)?"Clair":"Foncé";
-    return f+" "+c;
-  } else {
-    const t = (p.taille===0)?"Petit":"Grand";
-    const f = (p.forme===0)?"Rond":"Carré";
-    const c = (p.couleur===0)?"Clair":"Foncé";
-    const r = (p.remplissage===0)?"Plein":"Creux";
-    return `${t}\n${f}\n${c} ${r}`;
-  }
-}
+      function botRandomPlay() {
+        let emptyCells = [];
+        for (let i = 0; i < gameState.gridSize; i++) {
+          for (let j = 0; j < gameState.gridSize; j++) {
+            if (gameState.grid[i][j] === null) {
+              emptyCells.push({ row: i, col: j });
+            }
+          }
+        }
+        if (emptyCells.length === 0) return;
+        const choice = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        gameState = applyMoveReal(gameState, { type: "placement", row: choice.row, col: choice.col });
+        renderBoard();
+        if (gameState.terminal) {
+          endGame("L'adversaire a gagné !");
+          return;
+        }
+        const pieces = getAllPossiblePieces();
+        gameState = applyMoveReal(gameState, { type: "selection", piece: pieces[Math.floor(Math.random() * pieces.length)] });
+        statusElement.textContent = "C'est votre tour. Vous devez placer une pièce " + describePiece(gameState.currentPiece) + ".";
+        updateGivenPieceDisplay();
+        gameState.currentPlayer = "human";
+        gameState.phase = "placement";
+        boardElement.style.pointerEvents = "auto";
+      }
 
-function displayPlayer(p) {
-  if (p==="AI") return "l'IA";
-  if (p===1) return "Joueur 1";
-  return "Joueur 2";
-}
-</script>
-</body>
-</html>
+      // Fonctions utilitaires pour l'IA smart
+      function cloneState(state) {
+        return {
+          grid: state.grid.map(row => row.slice()),
+          gridSize: state.gridSize,
+          phase: state.phase,
+          currentPlayer: state.currentPlayer,
+          currentPiece: state.currentPiece ? { ...state.currentPiece } : null,
+          terminal: state.terminal,
+          winner: state.winner,
+          pieceType: state.pieceType
+        };
+      }
+
+      function getLegalMoves(state) {
+        let moves = [];
+        if (state.phase === "placement") {
+          for (let i = 0; i < state.gridSize; i++) {
+            for (let j = 0; j < state.gridSize; j++) {
+              if (state.grid[i][j] === null) {
+                moves.push({ type: "placement", row: i, col: j });
+              }
+            }
+          }
+        } else if (state.phase === "selection") {
+          const pieces = getAllPossiblePieces();
+          for (let p of pieces) {
+            moves.push({ type: "selection", piece: p });
+          }
+        }
+        return moves;
+      }
+
+      function applyMovePure(state, move) {
+        let newState = cloneState(state);
+        if (newState.phase === "placement" && move.type === "placement") {
+          newState.grid[move.row][move.col] = newState.currentPiece;
+          if (checkWinForGrid(newState.grid, newState.gridSize)) {
+            newState.terminal = true;
+            newState.winner = newState.currentPlayer;
+            return newState;
+          } else if (isBoardFull(newState.grid, newState.gridSize)) {
+            newState.terminal = true;
+            newState.winner = null;
+            return newState;
+          }
+          newState.phase = "selection";
+          newState.currentPiece = null;
+          return newState;
+        }
+        if (newState.phase === "selection" && move.type === "selection") {
+          newState.currentPiece = move.piece;
+          newState.currentPlayer = (newState.currentPlayer === "bot") ? "human" : "bot";
+          newState.phase = "placement";
+          return newState;
+        }
+      }
+
+      function applyMoveReal(state, move) {
+        if (state.phase === "placement" && move.type === "placement") {
+          state.grid[move.row][move.col] = state.currentPiece;
+          if (checkWinForGrid(state.grid, state.gridSize)) {
+            state.terminal = true;
+            state.winner = state.currentPlayer;
+            return state;
+          } else if (isBoardFull(state.grid, state.gridSize)) {
+            state.terminal = true;
+            state.winner = null;
+            return state;
+          }
+          state.phase = "selection";
+          state.currentPiece = null;
+          return state;
+        }
+        if (state.phase === "selection" && move.type === "selection") {
+          state.currentPiece = move.piece;
+          state.currentPlayer = (state.currentPlayer === "bot") ? "human" : "bot";
+          state.phase = "placement";
+          return state;
+        }
+      }
+
+      function simulateRandomPlayout(state) {
+        let simState = cloneState(state);
+        while (!simState.terminal) {
+          let moves = getLegalMoves(simState);
+          if (moves.length === 0) break;
+          let move = moves[Math.floor(Math.random() * moves.length)];
+          simState = applyMovePure(simState, move);
+        }
+        if (simState.winner === "bot") return 100;
+        else if (simState.winner === "human") return -100;
+        return 0;
+      }
+
+      function evaluateState(state) {
+        if (state.terminal) {
+          if (state.winner === "bot") return 100;
+          else if (state.winner === "human") return -100;
+          return 0;
+        }
+        let scoreSum = 0;
+        const iterations = 10;
+        for (let i = 0; i < iterations; i++) {
+          scoreSum += simulateRandomPlayout(cloneState(state));
+        }
+        return scoreSum / iterations;
+      }
+
+      function minimax(state, depth, alpha, beta) {
+        if (state.terminal || depth === 0) {
+          return { score: evaluateState(state), moves: [] };
+        }
+        const movesList = getLegalMoves(state);
+        if (state.currentPlayer === "bot") {
+          let bestScore = -Infinity;
+          let bestMovesSequence = [];
+          for (let move of movesList) {
+            const newState = applyMovePure(state, move);
+            const result = minimax(newState, depth - 1, alpha, beta);
+            if (result.score > bestScore) {
+              bestScore = result.score;
+              bestMovesSequence = [move].concat(result.moves);
+            }
+            alpha = Math.max(alpha, bestScore);
+            if (beta <= alpha) break;
+          }
+          return { score: bestScore, moves: bestMovesSequence };
+        } else {
+          let bestScore = Infinity;
+          let bestMovesSequence = [];
+          for (let move of movesList) {
+            const newState = applyMovePure(state, move);
+            const result = minimax(newState, depth - 1, alpha, beta);
+            if (result.score < bestScore) {
+              bestScore = result.score;
+              bestMovesSequence = [move].concat(result.moves);
+            }
+            beta = Math.min(beta, bestScore);
+            if (beta <= alpha) break;
+          }
+          return { score: bestScore, moves: bestMovesSequence };
+        }
+      }
+
+      function smartBotMove() {
+        const searchState = cloneState(gameState);
+        const maxDepth = 4;  // Profondeur de recherche ajustable
+        const result = minimax(searchState, maxDepth, -Infinity, Infinity);
+        const movesSequence = result.moves;
+        if (movesSequence.length > 0 && movesSequence[0].type === "placement") {
+          gameState = applyMoveReal(gameState, movesSequence[0]);
+          renderBoard();
+          if (gameState.terminal) {
+            endGame("L'adversaire a gagné !");
+            return;
+          }
+          if (movesSequence.length > 1 && movesSequence[1].type === "selection") {
+            gameState = applyMoveReal(gameState, movesSequence[1]);
+          } else {
+            const pieces = getAllPossiblePieces();
+            gameState = applyMoveReal(gameState, { type: "selection", piece: pieces[Math.floor(Math.random() * pieces.length)] });
+          }
+          statusElement.textContent = "C'est votre tour. Vous devez placer une pièce " + describePiece(gameState.currentPiece) + ".";
+          updateGivenPieceDisplay();
+          gameState.currentPlayer = "human";
+          gameState.phase = "placement";
+          boardElement.style.pointerEvents = "auto";
+        } else {
+          botRandomPlay();
+        }
+      }
+
+      // Met à jour l'affichage de la pièce qui nous a été donnée par l'adversaire
+      function updateGivenPieceDisplay() {
+        givenPieceElement.innerHTML = "";
+        if (gameState.currentPiece) {
+          let pieceElem = document.createElement("div");
+          pieceElem.classList.add("piece", gameState.currentPiece.shape, gameState.currentPiece.color);
+          if (gameState.pieceType === "complexe") {
+            pieceElem.classList.add(gameState.currentPiece.size, gameState.currentPiece.fill);
+          }
+          pieceElem.style.width = "50px";
+          pieceElem.style.height = "50px";
+          pieceElem.style.margin = "auto";
+          givenPieceElement.appendChild(pieceElem);
+        }
+      }
+
+      /****************************************************
+       * Partie 5 – Bouton de redémarrage et démarrage *
+       ****************************************************/
+      restartButton.addEventListener('click', function() {
+        restartButton.style.display = "none";
+        initGame();
+      });
+      startGameButton.addEventListener('click', function() {
+        document.getElementById('game-options').style.display = "none";
+        document.getElementById('game').style.display = "block";
+        initGame();
+      });
+    </script>
+  </div>
+
+
+</body></html>
