@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quarto corrigé</title>
+  <style>
+    /* ===================== RESET & GLOBAL ===================== */
+    * {
+      box-sizing: border-box;
+      margin: 0; 
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FCEBDC 0%, #F8E3CF 100%);
+      color: #333;
+    }
+    h1, h2, h3 {
+      margin: 0.5rem 0;
+      text-align: center;
+      color: #5C3D2E;
+    }
+    .container {
+      width: 95%;
+      max-width: 900px;
+      margin: 1rem auto;
+      background: #FFFDF8;
+      border: 2px solid rgba(200, 180, 150, 0.2);
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.15);
+      padding: 1rem;
+    }
+    button {
+      cursor: pointer;
+    }
+
+    /* ===================== PAGE DE CONFIG ===================== */
+    #settings-page {
+      display: block; /* visible au départ */
+    }
+    .settings-section {
+      margin-bottom: 1rem;
+    }
+    .settings-section label {
+      margin-right: 1rem;
+    }
+    .subsection {
+      margin-left: 2rem;
+      margin-top: 0.5rem;
+    }
+    #playBtn {
+      padding: 0.6rem 1.2rem;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    #playBtn:hover {
+      background: #218838;
+    }
+
+    /* ===================== PAGE DU JEU ===================== */
+    #game-page {
+      display: none; /* masqué au départ */
+    }
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      background: #ccc;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .status-info {
+      font-weight: bold;
+      color: #5C3D2E;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    /* ---------- Plateau ---------- */
+    #board {
+      display: grid;
+      gap: 6px;
+      margin: 0 auto 1rem;
+      background: #F5EFEA;
+      border: 2px solid #D2C3B8;
+      border-radius: 8px;
+      padding: 6px;
+      max-width: 400px;
+    }
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FFFDF8;
+      border: 2px solid #D8CCC2;
+      border-radius: 6px;
+      width: 70px;
+      height: 70px;
+      position: relative;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .cell:hover {
+      transform: scale(1.04);
+      background: #FDF7ED;
+    }
+    .cell.highlight {
+      border-color: #FF7F2A;
+      background: #FFEFE4;
+    }
+
+    /* ---------- Stock des pièces ---------- */
+    #stock {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .piece-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #FFFDF8;
+      border: 2px solid #D8CCC2;
+      border-radius: 6px;
+      padding: 4px;
+      width: 60px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .piece-container:hover {
+      background: #FDF7ED;
+      transform: scale(1.03);
+    }
+    .piece-container.selected {
+      border-color: #5C92CA;
+      background: #E6F0FF;
+    }
+    .piece-visual {
+      margin-bottom: 4px;
+    }
+
+    /* Forme visuelle d'une pièce */
+    .shape {
+      margin: 0 auto;
+      transition: all 0.2s;
+    }
+
+    /* ---------- Pièce reçue ---------- */
+    #pieceGiven {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    #pieceGivenTitle {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ===================== MESSAGES ===================== */
+    #messageBox {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: #e3f7d3;
+      border: 1px solid #c9e7b7;
+      border-radius: 4px;
+      color: #2d5f2f;
+    }
+    #winningCombo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- =====================
+       PAGE DE CONFIG
+  ====================== -->
+  <div id="settings-page">
+    <h1>Configuration de la partie de Quarto</h1>
+
+    <!-- Taille du plateau -->
+    <div class="settings-section">
+      <h3>Taille du plateau</h3>
+      <label><input type="radio" name="boardSize" value="2x2" checked />2x2</label>
+      <label><input type="radio" name="boardSize" value="3x3" />3x3</label>
+      <label><input type="radio" name="boardSize" value="4x3" />4x3</label>
+      <label><input type="radio" name="boardSize" value="4x4" />4x4</label>
+    </div>
+
+    <!-- Adversaire -->
+    <div class="settings-section">
+      <h3>Adversaire</h3>
+      <label><input type="radio" name="opponent" value="human" checked />Humain (même appareil)</label>
+      <label><input type="radio" name="opponent" value="ai" />IA</label>
+
+      <!-- Options IA -->
+      <div id="ai-settings" class="subsection" style="display:none;">
+        <div>
+          <strong>Force de l’IA :</strong><br/>
+          <label><input type="radio" name="aiStrength" value="random" checked />Aléatoire</label>
+          <label><input type="radio" name="aiStrength" value="smart" />Smart (Minimax/MonteCarlo)</label>
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <strong>Qui commence ?</strong><br/>
+          <label><input type="radio" name="aiStarts" value="human" checked />Moi</label>
+          <label><input type="radio" name="aiStarts" value="ai" />IA</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options supplémentaires -->
+    <div class="settings-section">
+      <h3>Options supplémentaires</h3>
+      <label><input type="checkbox" id="simplifiedMode" />Mode simplifié (2 attributs)</label><br/>
+      <label><input type="checkbox" id="stockLimited" />Stock limité (uniques)</label>
+    </div>
+
+    <!-- Bouton Play -->
+    <div style="text-align:center; margin-top:1rem;">
+      <button id="playBtn">Play</button>
+    </div>
+  </div>
+
+  <!-- =====================
+       PAGE DE JEU
+  ====================== -->
+  <div id="game-page">
+    <div class="game-header">
+      <h1>Quarto</h1>
+      <button id="resetBtn" class="btn-small">Recommencer</button>
+    </div>
+
+    <!-- Info "Tour du joueur X" ou "Sélectionnez une pièce pour l'adversaire" -->
+    <div class="status-info" id="statusInfo">Préparez-vous…</div>
+
+    <!-- Aperçu de la pièce reçue -->
+    <div id="pieceGiven">
+      <div id="pieceGivenTitle"></div>
+      <div id="pieceGivenContent"></div>
+    </div>
+
+    <!-- Le plateau -->
+    <div id="board"></div>
+
+    <!-- Le stock de pièces disponibles -->
+    <div id="stock"></div>
+
+    <!-- Message (victoire, Quarto, etc.) -->
+    <div id="messageBox">
+      <div id="messageText"></div>
+      <div id="winningCombo"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   1) CONFIGURATION (FORM)
+============================================================ */
+const radioOpponent = document.getElementsByName("opponent");
+const aiSettingsDiv = document.getElementById("ai-settings");
+radioOpponent.forEach(radio => {
+  radio.addEventListener("change", () => {
+    if (radio.value === "ai" && radio.checked) {
+      aiSettingsDiv.style.display = "block";
+    } else if (radio.value === "human" && radio.checked) {
+      aiSettingsDiv.style.display = "none";
+    }
+  });
+});
+
+document.getElementById("playBtn").addEventListener("click", () => {
+  startGame();
+});
+
+function getSettings() {
+  const boardSize = document.querySelector('input[name="boardSize"]:checked').value;
+  const opponent = document.querySelector('input[name="opponent"]:checked').value;
+
+  let aiStrength = null;
+  let aiStarts   = null;
+  if (opponent === "ai") {
+    aiStrength = document.querySelector('input[name="aiStrength"]:checked').value;
+    aiStarts   = document.querySelector('input[name="aiStarts"]:checked').value;
+  }
+
+  const simplifiedMode = document.getElementById("simplifiedMode").checked;
+  const stockLimited   = document.getElementById("stockLimited").checked;
+
+  return { boardSize, opponent, aiStrength, aiStarts, simplifiedMode, stockLimited };
+}
+
+/* ============================================================
+   2) VARIABLES & DÉMARRAGE
+============================================================ */
+let settings = null;
+let nbRows = 0, nbCols = 0;
+let boardState = [];       // tableau 2D
+let piecesStock = [];      // pièces disponibles
+let selectedPiece = null;  // pièce qu'on "donne" à l'adversaire
+let pieceToPlace = null;   // pièce qu'on doit placer sur le plateau
+let currentPlayer = 1;     // 1, 2, ou "AI"
+let gameOver = false;
+
+function startGame() {
+  settings = getSettings();
+
+  // Déterminer rows/cols
+  const parts = settings.boardSize.split("x");
+  nbRows = parseInt(parts[0]);
+  nbCols = parseInt(parts[1]);
+
+  // Générer les pièces
+  generateAllPieces();
+
+  // Stock limité -> on ne garde que nbRows * nbCols pièces
+  const totalCells = nbRows * nbCols;
+  if (settings.stockLimited) {
+    piecesStock = piecesStock.slice(0, totalCells);
+  } else {
+    // Au besoin, on duplique si le plateau est plus grand
+    if (piecesStock.length < totalCells) {
+      const needed = totalCells - piecesStock.length;
+      for (let i=0; i<needed; i++) {
+        piecesStock.push({...piecesStock[i], id: 1000 + i});
+      }
+    }
+  }
+
+  createBoard();
+
+  // Afficher la page de jeu
+  document.getElementById("settings-page").style.display = "none";
+  document.getElementById("game-page").style.display = "block";
+
+  // Init
+  boardState = Array.from({ length: nbRows }, () => Array(nbCols).fill(null));
+  gameOver = false;
+  pieceToPlace = null;
+  selectedPiece = null;
+  currentPlayer = 1; // par défaut, l'humain commence
+
+  if (settings.opponent === "ai" && settings.aiStarts === "ai") {
+    currentPlayer = "AI";
+  }
+
+  renderStock();
+  renderReceivedPiece(null);
+  updateStatus();
+
+  // Si l'IA commence => elle choisit la première pièce
+  if (currentPlayer === "AI") {
+    setTimeout(() => {
+      aiChoosePieceForOpponent();
+    }, 500);
+  }
+}
+
+/* ============================================================
+   3) GÉNÉRATION DES PIÈCES
+============================================================ */
+function generateAllPieces() {
+  piecesStock = [];
+  if (settings.simplifiedMode) {
+    // 2 attributs => forme(0,1), couleur(0,1)
+    for (let f=0; f<2; f++) {
+      for (let c=0; c<2; c++) {
+        piecesStock.push({
+          id: piecesStock.length,
+          taille: 0,
+          forme: f,
+          couleur: c,
+          remplissage: 0
+        });
+      }
+    }
+  } else {
+    // 4 attributs => 16 combos
+    for (let t=0; t<2; t++) {
+      for (let f=0; f<2; f++) {
+        for (let c=0; c<2; c++) {
+          for (let r=0; r<2; r++) {
+            piecesStock.push({
+              id: piecesStock.length,
+              taille: t,
+              forme: f,
+              couleur: c,
+              remplissage: r
+            });
+          }
+        }
+      }
+    }
+  }
+}
+
+/* ============================================================
+   4) PLATEAU
+============================================================ */
+function createBoard() {
+  const boardDiv = document.getElementById("board");
+  boardDiv.innerHTML = "";
+  boardDiv.style.gridTemplateRows = `repeat(${nbRows}, 70px)`;
+  boardDiv.style.gridTemplateColumns = `repeat(${nbCols}, 70px)`;
+
+  for (let r=0; r<nbRows; r++) {
+    for (let c=0; c<nbCols; c++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener("click", () => onCellClicked(r,c));
+      boardDiv.appendChild(cell);
+    }
+  }
+}
+
+function onCellClicked(r, c) {
+  if (gameOver) return;
+  if (!pieceToPlace) return; // on n'a pas encore reçu de pièce
+  if (boardState[r][c] !== null) return; // cellule occupée
+
+  // Placer la pièce qu'on a reçue
+  boardState[r][c] = pieceToPlace;
+  renderCell(r, c, pieceToPlace);
+
+  // Retirer du stock
+  piecesStock = piecesStock.filter(p => p.id !== pieceToPlace.id);
+  renderStock();
+
+  // Vérifier Quarto
+  if (checkQuarto(r, c)) {
+    endGame(`QUARTO ! ${displayPlayer(currentPlayer)} gagne !`);
+    return;
+  }
+
+  // Étape suivante : on doit choisir la pièce pour l'adversaire
+  pieceToPlace = null;
+  renderReceivedPiece(null);
+
+  updateStatus();
+}
+
+/* Mettre à jour l'affichage d’une cellule */
+function renderCell(r, c, piece) {
+  const boardDiv = document.getElementById("board");
+  const cell = boardDiv.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+  cell.innerHTML = "";
+  if (!piece) return;
+
+  const shapeDiv = document.createElement("div");
+  shapeDiv.style.display = "inline-block";
+  applyPieceStyles(shapeDiv, piece, { forBoard: true });
+  cell.appendChild(shapeDiv);
+}
+
+/* ============================================================
+   5) STOCK : sélection d'une pièce pour l'adversaire
+============================================================ */
+function renderStock() {
+  const stockDiv = document.getElementById("stock");
+  stockDiv.innerHTML = "";
+
+  piecesStock.forEach(piece => {
+    const container = document.createElement("div");
+    container.classList.add("piece-container");
+    container.dataset.id = piece.id;
+
+    if (selectedPiece && selectedPiece.id === piece.id) {
+      container.classList.add("selected");
+    }
+
+    const shapeDiv = document.createElement("div");
+    shapeDiv.classList.add("shape","piece-visual");
+    applyPieceStyles(shapeDiv, piece);
+    container.appendChild(shapeDiv);
+
+    const txt = document.createElement("div");
+    txt.style.fontSize = "0.6rem";
+    txt.textContent = pieceToString(piece);
+    container.appendChild(txt);
+
+    // Clic => on "donne" cette pièce à l’adversaire
+    container.addEventListener("click", () => {
+      if (gameOver) return;
+      // Si on a encore une pièce à poser, on ne peut pas en choisir une nouvelle
+      if (pieceToPlace) return;
+
+      selectedPiece = piece;
+      renderStock();
+      givePieceToNextPlayer(piece);
+    });
+
+    stockDiv.appendChild(container);
+  });
+}
+
+/* ============================================================
+   6) FIN D'UN TOUR : ON DONNE LA PIÈCE À L'ADVERSAIRE
+============================================================ */
+function givePieceToNextPlayer(piece) {
+  selectedPiece = null;
+
+  // Fin du tour du joueur courant => on passe à l'adversaire
+  if (settings.opponent === "ai") {
+    currentPlayer = (currentPlayer === 1) ? "AI" : 1;
+  } else {
+    currentPlayer = (currentPlayer === 1) ? 2 : 1;
+  }
+
+  // L’adversaire reçoit cette pièce à poser
+  pieceToPlace = piece;
+  renderReceivedPiece(piece);
+
+  updateStatus();
+
+  // Si c'est l'IA qui doit poser, on la laisse jouer
+  if (currentPlayer === "AI") {
+    // L'IA place la pièce reçue
+    setTimeout(() => {
+      aiPlacePiece();
+    }, 500);
+  }
+}
+
+/* Indication sur l’état du jeu */
+function updateStatus() {
+  const info = document.getElementById("statusInfo");
+  if (gameOver) {
+    info.textContent = "Partie terminée.";
+    return;
+  }
+  if (pieceToPlace) {
+    info.textContent = `${displayPlayer(currentPlayer)} doit poser la pièce reçue…`;
+  } else {
+    info.textContent = `${displayPlayer(currentPlayer)} doit choisir une pièce pour l'adversaire…`;
+  }
+}
+
+/* ============================================================
+   7) PIÈCE REÇUE : affichage
+============================================================ */
+function renderReceivedPiece(piece) {
+  const titleDiv = document.getElementById("pieceGivenTitle");
+  const contentDiv = document.getElementById("pieceGivenContent");
+  contentDiv.innerHTML = "";
+
+  if (!piece) {
+    titleDiv.textContent = "Aucune pièce reçue pour l'instant.";
+    return;
+  }
+  titleDiv.textContent = "Pièce à poser :";
+
+  const container = document.createElement("div");
+  container.classList.add("piece-container");
+
+  const shapeDiv = document.createElement("div");
+  shapeDiv.classList.add("shape","piece-visual");
+  applyPieceStyles(shapeDiv, piece);
+  container.appendChild(shapeDiv);
+
+  const txt = document.createElement("div");
+  txt.style.fontSize = "0.6rem";
+  txt.textContent = pieceToString(piece);
+  container.appendChild(txt);
+
+  contentDiv.appendChild(container);
+}
+
+/* ============================================================
+   8) IA : PLACE ET CHOISIT
+============================================================ */
+function aiChoosePieceForOpponent() {
+  if (gameOver) return;
+  let piece = null;
+  if (settings.aiStrength === "random") {
+    piece = pickRandomPiece();
+  } else {
+    piece = pickSmartPiece();
+  }
+  // On "donne" la pièce au joueur humain
+  givePieceToNextPlayer(piece);
+}
+
+function aiPlacePiece() {
+  if (gameOver || !pieceToPlace) return;
+
+  let move = null;
+  if (settings.aiStrength === "random") {
+    move = pickRandomMove();
+  } else {
+    move = pickSmartMove();
+  }
+
+  // Plus de coups ?
+  if (!move) {
+    endGame("Plus de coups possibles, match nul !");
+    return;
+  }
+
+  // L'IA place la pièce
+  boardState[move.r][move.c] = pieceToPlace;
+  renderCell(move.r, move.c, pieceToPlace);
+  piecesStock = piecesStock.filter(p => p.id !== pieceToPlace.id);
+  renderStock();
+
+  // Vérifier Quarto
+  if (checkQuarto(move.r, move.c)) {
+    endGame("QUARTO ! L'IA gagne !");
+    return;
+  }
+
+  // L'IA a posé sa pièce => elle choisit maintenant la pièce pour l'autre
+  pieceToPlace = null;
+  renderReceivedPiece(null);
+
+  setTimeout(() => {
+    aiChoosePieceForOpponent();
+  }, 500);
+}
+
+/* IA aléatoire : choisir une pièce */
+function pickRandomPiece() {
+  if (piecesStock.length===0) return null;
+  const idx = Math.floor(Math.random()*piecesStock.length);
+  return piecesStock[idx];
+}
+
+/* IA "smart" (mini-exemple) */
+function pickSmartPiece() {
+  let bestPiece = null;
+  let bestScore = -Infinity;
+  for (let p of piecesStock) {
+    const sc = evaluatePieceChoice(p);
+    if (sc>bestScore) {
+      bestScore= sc;
+      bestPiece= p;
+    }
+  }
+  return bestPiece;
+}
+
+/* IA aléatoire : choisir une cellule */
+function pickRandomMove() {
+  const moves = [];
+  for (let r=0; r<nbRows; r++){
+    for (let c=0; c<nbCols; c++){
+      if (!boardState[r][c]) moves.push({r,c});
+    }
+  }
+  if (moves.length===0) return null;
+  const idx = Math.floor(Math.random()*moves.length);
+  return moves[idx];
+}
+
+/* IA "smart" : chercher coup gagnant sinon pseudo-scorer */
+function pickSmartMove() {
+  // 1) Coup gagnant immédiat ?
+  const winning = findWinningMove(pieceToPlace);
+  if (winning) return winning;
+
+  // 2) Sinon pseudo-score
+  let bestMove=null, bestScore=-Infinity;
+  const moves = [];
+  for (let r=0; r<nbRows; r++){
+    for (let c=0; c<nbCols; c++){
+      if (!boardState[r][c]) moves.push({r,c});
+    }
+  }
+  if (moves.length===0) return null;
+
+  for (let mv of moves) {
+    const sc = evaluateMoveForAI(mv, pieceToPlace);
+    if (sc>bestScore) {
+      bestScore=sc;
+      bestMove=mv;
+    }
+  }
+  return bestMove;
+}
+
+function findWinningMove(piece) {
+  for (let r=0; r<nbRows; r++){
+    for (let c=0; c<nbCols; c++){
+      if (!boardState[r][c]) {
+        boardState[r][c] = piece;
+        const w = checkQuarto(r, c);
+        boardState[r][c] = null;
+        if (w) return {r,c};
+      }
+    }
+  }
+  return null;
+}
+
+function evaluateMoveForAI(move, piece) {
+  boardState[move.r][move.c] = piece;
+  const sc = pseudoMonteCarloScore();
+  boardState[move.r][move.c] = null;
+  return sc;
+}
+
+function evaluatePieceChoice(piece) {
+  // Simplement random
+  return Math.random()*10;
+}
+
+function pseudoMonteCarloScore() {
+  return Math.floor(Math.random()*10);
+}
+
+/* ============================================================
+   9) CHECK QUARTO & FIN DE PARTIE
+============================================================ */
+function checkQuarto(r, c) {
+  const linesOf4 = getAllLinesOf4();
+  const idxToCheck = r*nbCols + c;
+
+  for (let line of linesOf4) {
+    if (line.includes(idxToCheck)) {
+      const pieces = line.map(i => {
+        const rr = Math.floor(i/nbCols);
+        const cc = i%nbCols;
+        return boardState[rr][cc];
+      });
+      if (pieces.every(x => x!==null)) {
+        // Attribut commun ?
+        const attr = isQuartoLine(pieces);
+        if (attr) {
+          highlightCells(line);
+          // Ex: endGame(...). On renvoie true pour signaler la victoire
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/* Renvoie "taille"/"forme"/"couleur"/"remplissage" si commun, sinon null */
+function isQuartoLine(pieces) {
+  const attrs = ["taille","forme","couleur","remplissage"];
+  for (let a of attrs) {
+    let v0 = pieces[0][a];
+    if (pieces[1][a]===v0 && pieces[2][a]===v0 && pieces[3][a]===v0) {
+      return a;
+    }
+  }
+  return null;
+}
+
+function getAllLinesOf4() {
+  const combos = [];
+  // Horizontales
+  for (let r=0; r<nbRows; r++){
+    for (let c=0; c<nbCols-3; c++){
+      combos.push([r*nbCols+c, r*nbCols+c+1, r*nbCols+c+2, r*nbCols+c+3]);
+    }
+  }
+  // Verticales
+  for (let c=0; c<nbCols; c++){
+    for (let r=0; r<nbRows-3; r++){
+      combos.push([r*nbCols+c, (r+1)*nbCols+c, (r+2)*nbCols+c, (r+3)*nbCols+c]);
+    }
+  }
+  // Diag descendantes
+  for (let r=0; r<nbRows-3; r++){
+    for (let c=0; c<nbCols-3; c++){
+      combos.push([
+        r*nbCols + c,
+        (r+1)*nbCols + (c+1),
+        (r+2)*nbCols + (c+2),
+        (r+3)*nbCols + (c+3),
+      ]);
+    }
+  }
+  // Diag ascendantes
+  for (let r=3; r<nbRows; r++){
+    for (let c=0; c<nbCols-3; c++){
+      combos.push([
+        r*nbCols + c,
+        (r-1)*nbCols + (c+1),
+        (r-2)*nbCols + (c+2),
+        (r-3)*nbCols + (c+3),
+      ]);
+    }
+  }
+  return combos;
+}
+
+function highlightCells(line) {
+  const boardDiv = document.getElementById("board");
+  line.forEach(idx => {
+    const rr = Math.floor(idx/nbCols);
+    const cc = idx%nbCols;
+    const cell = boardDiv.querySelector(`.cell[data-row='${rr}'][data-col='${cc}']`);
+    if (cell) cell.classList.add("highlight");
+  });
+}
+
+/* Fin de partie */
+function endGame(msg) {
+  gameOver = true;
+  document.getElementById("messageBox").style.display = "block";
+  document.getElementById("messageText").textContent = msg;
+  updateStatus();
+}
+
+/* ============================================================
+   10) RECOMMENCER
+============================================================ */
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("settings-page").style.display = "block";
+  document.getElementById("game-page").style.display = "none";
+  document.getElementById("messageBox").style.display = "none";
+});
+
+/* =====================
+   UTILITAIRES
+===================== */
+function applyPieceStyles(el, piece, options={}) {
+  const { forBoard=false } = options;
+  const size = forBoard ? 40 : 30;
+
+  el.style.width = size + "px";
+  el.style.height = size + "px";
+
+  // Agrandir si "grand"
+  const scale = (piece.taille===1)?1.3:1.0;
+  el.style.transform = `scale(${scale})`;
+
+  // Forme
+  el.style.borderRadius = (piece.forme===0)?"50%":"0";
+
+  // Couleurs
+  const bgClair="#ECE3D5", borderClair="#CAB7A2";
+  const bgFonce="#7B5B46", borderFonce="#5C3D2E";
+  const isFonce = (piece.couleur===1);
+
+  // Remplissage
+  if (piece.remplissage===0) {
+    el.style.backgroundColor = isFonce?bgFonce:bgClair;
+    el.style.borderWidth="0px";
+    el.style.borderStyle="none";
+  } else {
+    el.style.backgroundColor="transparent";
+    el.style.borderWidth="4px";
+    el.style.borderStyle="solid";
+    el.style.borderColor=isFonce?borderFonce:borderClair;
+  }
+}
+
+function pieceToString(p) {
+  if (settings && settings.simplifiedMode) {
+    const f = (p.forme===0)?"Rond":"Carré";
+    const c = (p.couleur===0)?"Clair":"Foncé";
+    return f+" "+c;
+  } else {
+    const t = (p.taille===0)?"Petit":"Grand";
+    const f = (p.forme===0)?"Rond":"Carré";
+    const c = (p.couleur===0)?"Clair":"Foncé";
+    const r = (p.remplissage===0)?"Plein":"Creux";
+    return `${t}\n${f}\n${c} ${r}`;
+  }
+}
+
+function displayPlayer(p) {
+  if (p==="AI") return "l'IA";
+  if (p===1) return "Joueur 1";
+  return "Joueur 2";
+}
+</script>
+</body>
+</html>
